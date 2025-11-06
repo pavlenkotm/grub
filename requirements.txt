@@ -1,0 +1,9 @@
+# GRUB Requirements
+# This project uses only Python standard library
+# No external dependencies required
+
+# For development and testing (optional)
+# pytest>=7.0.0
+# black>=22.0.0
+# flake8>=4.0.0
+# mypy>=0.950

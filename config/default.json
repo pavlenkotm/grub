@@ -1,0 +1,9 @@
+{
+  "app_name": "GRUB",
+  "version": "1.0.0",
+  "debug": false,
+  "log_level": "INFO",
+  "max_workers": 4,
+  "timeout": 30,
+  "retry_attempts": 3
+}

@@ -7,7 +7,7 @@ import tempfile
 import json
 import os
 
-from ..core.config import Config
+from src.core.config import Config
 
 
 class TestConfig(unittest.TestCase):

@@ -42,16 +42,25 @@ def retry(max_attempts: int = 3, delay: float = 1.0):
     Returns:
         Decorated function
     """
+    if max_attempts < 1:
+        raise ValueError("max_attempts must be at least 1")
+
     def decorator(func: Callable) -> Callable:
         def wrapper(*args, **kwargs) -> Any:
+            last_exception = None
             for attempt in range(max_attempts):
                 try:
                     return func(*args, **kwargs)
                 except Exception as e:
+                    last_exception = e
                     if attempt == max_attempts - 1:
                         raise
                     print(f"Attempt {attempt + 1} failed: {e}. Retrying...")
                     time.sleep(delay)
+            # This should never be reached, but raise the last exception if it does
+            if last_exception:
+                raise last_exception
+            raise RuntimeError("Retry decorator failed without exception")
         return wrapper
     return decorator
 

@@ -24,8 +24,34 @@ class Validator:
         Returns:
             True if valid email
         """
-        pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
-        return bool(re.match(pattern, value))
+        # More robust email validation
+        # Local part: alphanumeric and ._%+- but no consecutive dots or dots at start/end
+        # Domain: alphanumeric and dots/hyphens, at least one dot, valid TLD
+        pattern = r'^[a-zA-Z0-9][a-zA-Z0-9._%+-]*[a-zA-Z0-9]@[a-zA-Z0-9][a-zA-Z0-9.-]*\.[a-zA-Z]{2,}$|^[a-zA-Z0-9]@[a-zA-Z0-9][a-zA-Z0-9.-]*\.[a-zA-Z]{2,}$'
+
+        if not re.match(pattern, value):
+            return False
+
+        # Additional checks for consecutive dots and other invalid patterns
+        local, domain = value.rsplit('@', 1)
+
+        # Check for consecutive dots
+        if '..' in local or '..' in domain:
+            return False
+
+        # Check local part length (max 64 characters per RFC 5321)
+        if len(local) > 64:
+            return False
+
+        # Check total length (max 254 characters per RFC 5321)
+        if len(value) > 254:
+            return False
+
+        # Check domain part (max 253 characters)
+        if len(domain) > 253:
+            return False
+
+        return True
 
     @staticmethod
     def is_url(value: str) -> bool:

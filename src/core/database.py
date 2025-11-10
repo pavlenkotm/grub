@@ -59,7 +59,7 @@ class Database:
         finally:
             cursor.close()
 
-    def execute(self, query: str, params: Optional[Tuple] = None) -> sqlite3.Cursor:
+    def execute(self, query: str, params: Optional[Tuple] = None) -> int:
         """Execute SQL query
 
         Args:
@@ -67,14 +67,16 @@ class Database:
             params: Optional query parameters
 
         Returns:
-            Database cursor
+            Number of affected rows
         """
         with self.get_cursor() as cursor:
             if params:
                 cursor.execute(query, params)
             else:
                 cursor.execute(query)
-            return cursor
+            # Fetch rowcount before cursor closes
+            rowcount = cursor.rowcount
+        return rowcount
 
     def execute_many(self, query: str, params_list: List[Tuple]) -> None:
         """Execute SQL query for multiple parameter sets

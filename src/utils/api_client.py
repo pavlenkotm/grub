@@ -76,8 +76,12 @@ class APIClient:
         except URLError as e:
             self.logger.error(f"URL Error: {e.reason}")
             raise
+        except json.JSONDecodeError as e:
+            self.logger.error(f"JSON Decode Error: {e}")
+            raise
         except Exception as e:
-            self.logger.error(f"Request failed: {e}")
+            # Catch-all for unexpected errors (timeout, encoding issues, etc.)
+            self.logger.error(f"Unexpected request error: {e}")
             raise
 
     def get(self, endpoint: str, headers: Optional[Dict[str, str]] = None) -> Dict[str, Any]:

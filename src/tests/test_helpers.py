@@ -3,7 +3,7 @@ Tests for helper utility functions
 """
 
 import unittest
-from ..utils.helpers import (
+from src.utils.helpers import (
     get_timestamp,
     calculate_hash,
     chunk_list,

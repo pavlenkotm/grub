@@ -221,15 +221,19 @@ class Scheduler:
 
 # Global scheduler instance
 _default_scheduler: Optional[Scheduler] = None
+_scheduler_lock = Lock()
 
 
 def get_scheduler() -> Scheduler:
-    """Get or create default scheduler
+    """Get or create default scheduler (thread-safe)
 
     Returns:
         Scheduler instance
     """
     global _default_scheduler
     if _default_scheduler is None:
-        _default_scheduler = Scheduler()
+        with _scheduler_lock:
+            # Double-check locking pattern
+            if _default_scheduler is None:
+                _default_scheduler = Scheduler()
     return _default_scheduler

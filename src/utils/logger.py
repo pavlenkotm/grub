@@ -6,6 +6,7 @@ import logging
 import os
 from datetime import datetime
 from typing import Optional
+from threading import Lock
 
 
 class Logger:
@@ -74,10 +75,11 @@ class Logger:
 
 # Global logger instance
 _default_logger: Optional[Logger] = None
+_logger_lock = Lock()
 
 
 def get_logger(name: str = "GRUB", level: str = "INFO", log_file: Optional[str] = None) -> Logger:
-    """Get or create logger instance
+    """Get or create logger instance (thread-safe)
 
     Args:
         name: Logger name
@@ -89,5 +91,8 @@ def get_logger(name: str = "GRUB", level: str = "INFO", log_file: Optional[str] 
     """
     global _default_logger
     if _default_logger is None:
-        _default_logger = Logger(name, level, log_file)
+        with _logger_lock:
+            # Double-check locking pattern
+            if _default_logger is None:
+                _default_logger = Logger(name, level, log_file)
     return _default_logger

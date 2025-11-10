@@ -119,37 +119,85 @@ class CommandLineInterface:
 
     def _handle_start(self, config: Config, args) -> int:
         """Handle start command"""
-        self.logger.info(f"Starting application with {args.workers} workers")
-        config.set("max_workers", args.workers)
-        app = GrubApp(config.get_all())
-        app.run()
-        return 0
+        try:
+            self.logger.info(f"Starting application with {args.workers} workers")
+            config.set("max_workers", args.workers)
+            app = GrubApp(config_dict=config.get_all())
+            app.run()
+            return 0
+        except Exception as e:
+            self.logger.error(f"Failed to start application: {e}")
+            return 1
 
     def _handle_status(self) -> int:
         """Handle status command"""
-        print("GRUB Application Status: Ready")
-        print("Version: 1.0.0")
-        return 0
+        try:
+            # Create a temporary app instance to get status
+            print("GRUB Application Status")
+            print("=" * 40)
+            print(f"Version: 1.0.0")
+            print(f"Status: Ready to start")
+            print("")
+            print("To run the application, use: grub start")
+            return 0
+        except Exception as e:
+            print(f"Error getting status: {e}")
+            return 1
 
     def _handle_config(self, config: Config, args) -> int:
         """Handle config command"""
-        if args.action == "show":
-            print("Current configuration:")
-            for key, value in config.get_all().items():
-                print(f"  {key}: {value}")
-        elif args.action == "get":
-            if not args.key:
-                print("Error: key required for 'get' action")
-                return 1
-            value = config.get(args.key)
-            print(f"{args.key}: {value}")
-        elif args.action == "set":
-            if not args.key or not args.value:
-                print("Error: key and value required for 'set' action")
-                return 1
-            config.set(args.key, args.value)
-            print(f"Set {args.key} = {args.value}")
-        return 0
+        try:
+            if args.action == "show":
+                print("Current configuration:")
+                config_data = config.get_all()
+                if not config_data:
+                    print("  (empty)")
+                else:
+                    for key, value in config_data.items():
+                        print(f"  {key}: {value}")
+            elif args.action == "get":
+                if not args.key:
+                    print("Error: key required for 'get' action")
+                    return 1
+                # Validate key format
+                if not args.key.replace('.', '').replace('_', '').isalnum():
+                    print(f"Error: invalid key format '{args.key}'")
+                    return 1
+                value = config.get(args.key)
+                if value is None:
+                    print(f"Key '{args.key}' not found")
+                    return 1
+                print(f"{args.key}: {value}")
+            elif args.action == "set":
+                if not args.key or not args.value:
+                    print("Error: key and value required for 'set' action")
+                    return 1
+                # Validate key format
+                if not args.key.replace('.', '').replace('_', '').isalnum():
+                    print(f"Error: invalid key format '{args.key}'")
+                    return 1
+                # Try to parse value as appropriate type
+                try:
+                    # Try to convert to int
+                    if args.value.isdigit():
+                        value = int(args.value)
+                    # Try to convert to float
+                    elif '.' in args.value and args.value.replace('.', '').replace('-', '').isdigit():
+                        value = float(args.value)
+                    # Check for boolean
+                    elif args.value.lower() in ('true', 'false'):
+                        value = args.value.lower() == 'true'
+                    else:
+                        value = args.value
+                    config.set(args.key, value)
+                    print(f"Set {args.key} = {value}")
+                except ValueError:
+                    config.set(args.key, args.value)
+                    print(f"Set {args.key} = {args.value}")
+            return 0
+        except Exception as e:
+            print(f"Error handling config command: {e}")
+            return 1
 
 
 def main():

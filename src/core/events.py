@@ -129,15 +129,19 @@ class EventEmitter:
 
 # Global event emitter instance
 _default_emitter: EventEmitter = None
+_emitter_lock = Lock()
 
 
 def get_event_emitter() -> EventEmitter:
-    """Get or create default event emitter
+    """Get or create default event emitter (thread-safe)
 
     Returns:
         EventEmitter instance
     """
     global _default_emitter
     if _default_emitter is None:
-        _default_emitter = EventEmitter()
+        with _emitter_lock:
+            # Double-check locking pattern
+            if _default_emitter is None:
+                _default_emitter = EventEmitter()
     return _default_emitter

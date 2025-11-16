@@ -166,16 +166,17 @@ Data validation utilities.
 
 ### APIClient
 
-HTTP API client.
+HTTP API client with built-in retries and a circuit breaker.
 
 #### Methods
 
-- `__init__(base_url, timeout=30, headers=None)` - Initialize client
+- `__init__(base_url, timeout=30, headers=None, max_retries=2, backoff_factor=0.5, jitter=0.1, circuit_breaker_threshold=5, circuit_breaker_reset=30)` - Initialize client with resilience controls
 - `get(endpoint, headers=None)` - Make GET request
 - `post(endpoint, data=None, headers=None)` - Make POST request
 - `put(endpoint, data=None, headers=None)` - Make PUT request
 - `delete(endpoint, headers=None)` - Make DELETE request
 - `set_auth_token(token, token_type="Bearer")` - Set auth token
+- `get_resilience_state()` - Inspect retry/circuit-breaker state for observability
 
 ### Helper Functions
 
